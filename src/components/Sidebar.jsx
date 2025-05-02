@@ -12,7 +12,7 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="h-screen w-60 bg-gray-900 text-white flex flex-col p-4">
+    <div className="h-screen w-54 bg-gray-900 text-white flex flex-col p-4">
       <h2 className="text-xl font-bold mb-6">Menu</h2>
       <nav className="flex flex-col gap-4">
 

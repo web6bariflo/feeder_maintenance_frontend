@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import mqtt from "mqtt";
+import { MqttContext } from "../../mqtt/MqttPublisher";
 
 const CameraModule = () => {
   const [imageData, setImageData] = useState([]);
