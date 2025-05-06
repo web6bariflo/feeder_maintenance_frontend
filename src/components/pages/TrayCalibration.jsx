@@ -14,7 +14,7 @@ const TrayCalibration = () => {
   const [targetId, setTargetId] = useState()
   const [targetHeight, setTargetHeight] = useState("");
   const [confirmationHeight, setConfirmationHeight] = useState("");
-  const [tableMode , setTableMode]= useState('check');
+  const [tableMode, setTableMode] = useState('check');
 
   const API_BASE_URL = import.meta.env.VITE_API_URL
   // Fetch logs from API
@@ -64,7 +64,7 @@ const TrayCalibration = () => {
     if (confirmationHeight.trim() === "") return;
 
     try {
-      await axios.patch(`${API_BASE_URL}/create_feeder/`, { confirmationHeight: confirmationHeight, id:targetId });
+      await axios.patch(`${API_BASE_URL}/create_feeder/`, { confirmationHeight: confirmationHeight, id: targetId });
       checkTargetHeight(); // Fetch updated logs
       setTargetHeight("");//clear input filed
       setConfirmationHeight("");//clear input field
@@ -89,7 +89,7 @@ const TrayCalibration = () => {
   };
 
   console.log(targetLogs);
-  
+
 
   useEffect(() => {
     fetchLogs()
@@ -142,30 +142,30 @@ const TrayCalibration = () => {
 
       {/* Display Logs Table */}
       <h1 className="text-2xl font-bold mt-6 underline">Display Logs</h1>
-      { logs.length > 0 ? (
+      {logs.length > 0 ? (
         <div className="max-h-65 overflow-y-auto border border-gray-300 rounded">
-        <table className="mt-4 border-collapse w-full border border-gray-300">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="border border-gray-300 p-2">ID</th>
-              <th className="border border-gray-300 p-2">Step Count</th>
-              <th className="border border-gray-300 p-2">Measured Height</th>
-            </tr>
-          </thead>
-          <tbody>
-            {logs.map((log, index) => (
-              <tr key={index} className="text-center">
-                <td className="border border-gray-300 p-2">{index + 1}</td>
-                <td className="border border-gray-300 p-2">{log.stepCount || "N/A"}</td>
-                <td className="border border-gray-300 p-2">{log.mesuredHeight || "N/A"}</td>
+          <table className="mt-4 border-collapse w-full border border-gray-300">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="border border-gray-300 p-2">ID</th>
+                <th className="border border-gray-300 p-2">Step Count</th>
+                <th className="border border-gray-300 p-2">Measured Height</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {logs.map((log, index) => (
+                <tr key={index} className="text-center">
+                  <td className="border border-gray-300 p-2">{index + 1}</td>
+                  <td className="border border-gray-300 p-2">{log.stepCount || "N/A"}</td>
+                  <td className="border border-gray-300 p-2">{log.mesuredHeight || "N/A"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       ) : logs.length === 0 ? (
         <p className="mt-4 text-gray-500">No logs available.</p>
-      ):null}
+      ) : null}
 
       <h1 className="text-2xl font-bold mb-4 mt-6 underline">Automatic Calibration</h1>
 
@@ -181,7 +181,7 @@ const TrayCalibration = () => {
         />
         <button
           className="bg-blue-500 text-white px-5 py-2 rounded-lg ml-2 hover:bg-blue-600"
-          onClick={()=>{
+          onClick={() => {
             checkTargetHeight();
             setTableMode('check');
           }}
@@ -199,25 +199,25 @@ const TrayCalibration = () => {
           className="border border-gray-300 p-2 rounded-lg w-64"
           value={confirmationHeight}
           onChange={(e) => setConfirmationHeight(e.target.value)}
-          disabled={targetLogs.length===0} // Disable if no target height logs
+          disabled={targetLogs.length === 0} // Disable if no target height logs
         />
         <button
-className={`px-6 py-2 rounded-lg ml-2 text-white ${targetLogs.length > 0 ? "bg-green-500 hover:bg-green-600" : "bg-gray-400 cursor-not-allowed"}`}
-onClick={() => {
-  handleConfirmationHeightSubmit(); // Your existing function
-  setTableMode("save"); // Set table mode to "save" to show full data
-}}
-disabled={targetLogs.length === 0 || loading} // Disable if no logs or loading
->
-{loading ? "Saving..." : "Save"}
+          className={`px-6 py-2 rounded-lg ml-2 text-white ${targetLogs.length > 0 ? "bg-green-500 hover:bg-green-600" : "bg-gray-400 cursor-not-allowed"}`}
+          onClick={() => {
+            handleConfirmationHeightSubmit(); // Your existing function
+            setTableMode("save"); // Set table mode to "save" to show full data
+          }}
+          disabled={targetLogs.length === 0 || loading} // Disable if no logs or loading
+        >
+          {loading ? "Saving..." : "Save"}
 
         </button>
       </div>
 
       {/* Display Logs Table */}
       <h1 className="text-2xl font-bold mt-6 underline">Display Logs</h1>
-      { targetLogs.length > 0 ? (
-      
+      {targetLogs.length > 0 ? (
+
         <table className="mt-4 border-collapse w-full border border-gray-300 ">
           <thead>
             <tr className="bg-gray-200">
@@ -225,10 +225,10 @@ disabled={targetLogs.length === 0 || loading} // Disable if no logs or loading
               <th className="border border-gray-300 p-2">Measured Height</th>
               <th className="border border-gray-300 p-2">stepCount</th>
               {tableMode === "save" && (
-               <>
-              <th className="border border-gray-300 p-2">conformation Height</th>
-              <th className="border border-gray-300 p-2">Deviation</th>
-              </>
+                <>
+                  <th className="border border-gray-300 p-2">conformation Height</th>
+                  <th className="border border-gray-300 p-2">Deviation</th>
+                </>
               )}
             </tr>
           </thead>
@@ -240,15 +240,15 @@ disabled={targetLogs.length === 0 || loading} // Disable if no logs or loading
                 <td className="border border-gray-300 p-2">{log.stepCount || "N/A"}</td>
                 {tableMode === "save" && (
                   <>
-                <td className="border border-gray-300 p-2">{log.confirmationHeight || "N/A"}</td>
-                <td className="border border-gray-300 p-2">{log.targetHeight-log.confirmationHeight || "N/A"}</td>
-                </>)}
+                    <td className="border border-gray-300 p-2">{log.confirmationHeight || "N/A"}</td>
+                    <td className="border border-gray-300 p-2">{log.targetHeight - log.confirmationHeight || "N/A"}</td>
+                  </>)}
               </tr>
             ))}
           </tbody>
 
         </table>
-      
+
       ) : (
         <p className="mt-4 text-gray-500">No logs available.</p>
       )}
@@ -257,3 +257,4 @@ disabled={targetLogs.length === 0 || loading} // Disable if no logs or loading
 };
 
 export default TrayCalibration;
+  
