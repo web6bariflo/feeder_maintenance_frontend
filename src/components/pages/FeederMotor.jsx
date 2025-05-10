@@ -18,7 +18,8 @@ const FeederMotorTest = () => {
     currentWeight,
     initialWeight,
     setInitialWeight,
-    sendStartCommand,
+    // sendStartCommand,
+    publishMessage
   } = useContext(MqttContext);
 
   const [cycleLogs, setCycleLogs] = useState([]);
@@ -78,7 +79,10 @@ const FeederMotorTest = () => {
       setFeederDone(false);
       setWeightData([{ weight: initialWeight }]);
       setCycleLogs([]);
-      sendStartCommand();
+      // sendStartCommand();
+      publishMessage("weight/subscribe", "Start"); // ✅ Publish start command
+      // console.log("Feeder started with initial weight:", initialWeight);
+
     } else {
       alert("Set the initial weight first.");
     }
@@ -163,8 +167,9 @@ const FeederMotorTest = () => {
       </div>
 
       <div className="bg-white rounded-lg shadow-sm p-5 space-y-4">
-        <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-end">
-          <div className="flex-1">
+        <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-end flex-wrap">
+
+          <div className="w-full sm:flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-1">Initial Weight (g)</label>
             <input
               type="number"
@@ -174,19 +179,22 @@ const FeederMotorTest = () => {
               placeholder="Enter initial weight"
             />
           </div>
-          <button
-            onClick={handleStart}
-            className="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-          >
-            Start Test
-          </button>
 
-          <button
-            onClick={handleReset}
-            className="px-2 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-          >
-            Reset Test
-          </button>
+          <div className="flex flex-row gap-2">
+            <button
+              onClick={handleStart}
+              className="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+            >
+              Start Test
+            </button>
+
+            <button
+              onClick={handleReset}
+              className="px-2 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+            >
+              Reset Test
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

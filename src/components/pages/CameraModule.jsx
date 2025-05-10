@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from "react";
 import mqtt from "mqtt";
 import { MqttContext } from "../../mqtt/MqttPublisher";
+import axios from "axios";
+import { FiDownload } from "react-icons/fi"; // Feather Icons
+
 
 const CameraModule = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
+
   const [imageData, setImageData] = useState([]);
-  
+
+  const { publishMessage } = React.useContext(MqttContext);
+
   useEffect(() => {
-    const socket = new WebSocket("ws://192.168.31.208:8001/ws/thermal-images/");
+    const socket = new WebSocket("ws://192.168.31.149:8000/ws/thermal-images/");
     setInterval(() => {
       if (socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({ type: "ping" }));
@@ -28,8 +35,6 @@ const CameraModule = () => {
           data.data.length > 0
         ) {
           setImageData(data.data);
-        } else {
-          console.warn("⚠️ No valid image data received:", data);
         }
       } catch (error) {
         console.error("❌ Error parsing WebSocket message:", error);
@@ -51,74 +56,102 @@ const CameraModule = () => {
 
   const handleCapture = () => {
     console.log("Capture button clicked");
-    // Implement capture logic here
+    publishMessage("feeder/camera_capture", "Capture");
   };
 
   const handleAutoCapture = () => {
     console.log("Auto Capture button clicked");
-    // Implement auto capture logic here
+    publishMessage("feeder/camera_auto_toggle", "on");
   };
 
-  const staticData = [
-    { id: 1, name: "Image 1", type: "PNG", time: "12:30 PM" },
-    { id: 2, name: "Image 2", type: "JPEG", time: "12:45 PM" },
-    { id: 3, name: "Image 3", type: "PNG", time: "01:00 PM" },
-    { id: 4, name: "Image 4", type: "JPEG", time: "01:15 PM" }
-  ];
+  const handleDownloadAll = async () => {
+    try {
+      const response = await axios.post(
+        "http://192.168.31.149:8000/download_all_thermal_images/",
+        null,
+        { responseType: "blob" }
+      );
+
+      const fileURL = URL.createObjectURL(response.data);
+      const link = document.createElement("a");
+      link.href = fileURL;
+      link.download = "thermal_images.zip";
+      link.click();
+      URL.revokeObjectURL(fileURL);
+    } catch (error) {
+      console.error("Error during downloading thermal images:", error);
+    }
+  };
 
   return (
-    <div className="flex flex-col items-center w-full space-y-4 mt-16">
+    <div className="flex flex-col items-center w-full mt-4 px-2 max-w-screen-xl mx-auto">
       {/* Buttons Section */}
-      <div className="flex space-x-4">
+
+      <div className="flex flex-row flex-wrap justify-center gap-6 mb-4">
         <button
           onClick={handleCapture}
-          className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition"
+          className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-800 text-white font-semibold rounded-xl shadow-lg hover:scale-105 transform transition duration-300 ease-in-out"
         >
           Capture
         </button>
         <button
           onClick={handleAutoCapture}
-          className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition"
+          className="px-8 py-3 bg-gradient-to-r from-purple-600 to-purple-800 text-white font-semibold rounded-xl shadow-lg hover:scale-105 transform transition duration-300 ease-in-out"
         >
           Auto Capture
         </button>
       </div>
 
-      {/* Table Section */}
-      <div className="w-full max-w-4xl mt-6">
-        <table className="w-full border-collapse border border-gray-300 rounded-lg overflow-hidden">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="border border-gray-300 px-4 py-2 rounded-tl-lg">#</th>
-              <th className="border border-gray-300 px-4 py-2">Image Name</th>
-              <th className="border border-gray-300 px-4 py-2">Type</th>
-              <th className="border border-gray-300 px-4 py-2 rounded-tr-lg">Time</th>
-            </tr>
-          </thead>
-          <tbody>
-            {staticData.map((item, index) => (
-              <tr key={item.id} className="text-center">
-                <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.name}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.type}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.time}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+
+
+      {/* Top-right Download All Button */}
+      <div className="w-full flex justify-end">
+        <button
+          onClick={handleDownloadAll}
+          className="flex items-center px-2 py-1 bg-green-700 hover:bg-green-800 text-white rounded gap-1 text-sm hover:scale-105 transform transition duration-300 ease-in-out font-semibold"
+        >
+          <FiDownload className="w-4 h-4" />
+          Download All
+        </button>
       </div>
 
       {/* Gallery View */}
-      <div className="grid grid-cols-3 gap-4 mt-6">
-        {imageData.map((img, index) => (
-          <div key={index} className="w-48 h-48 border-2 rounded-lg overflow-hidden shadow-md">
-            <img
-              src={`data:image/png;base64,${img.thermal_image}`}
-              alt={`Thermal Image ${index + 1}`}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        ))}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-4 w-full">
+        {imageData
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+          .map((img, index) => (
+            <div
+              key={index}
+              className="flex flex-col items-center w-full bg-white rounded-2xl shadow-xl transition hover:shadow-2xl p-2"
+            >
+              <div className="rounded-xl overflow-hidden border-4 border-gray-200">
+                <img
+                  src={`data:image/png;base64,${img.thermal_image}`}
+                  alt={`Thermal Image ${index + 1}`}
+                  className="object-cover w-full h-auto transition-transform duration-300 hover:scale-105"
+                />
+              </div>
+              <div className="flex items-center justify-between mt-3 mb-1 w-full px-1 text-xs text-gray-700 font-medium">
+                <div className="bg-gray-200 px-2 py-1 rounded-md shadow-sm">
+                  {new Date(img.created_at).toLocaleString()}
+                </div>
+                <button
+                  onClick={() => {
+                    const base64Data = img.thermal_image;
+                    const fileName = `thermal_image_${index + 1}.png`;
+                    const url = `data:image/png;base64,${base64Data}`;
+                    const link = document.createElement("a");
+                    link.href = url;
+                    link.download = fileName;
+                    link.click();
+                  }}
+                  className="text-white bg-green-600 hover:bg-green-700 px-3 py-1 rounded-md shadow-sm transition duration-200"
+                >
+                  <FiDownload className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ))}
       </div>
     </div>
   );

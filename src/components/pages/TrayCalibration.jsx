@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { MqttContext } from "../../mqtt/MqttPublisher";
+import { useContext } from "react";
 
 
 const TrayCalibration = () => {
@@ -15,6 +16,7 @@ const TrayCalibration = () => {
   const [targetHeight, setTargetHeight] = useState("");
   const [confirmationHeight, setConfirmationHeight] = useState("");
   const [tableMode, setTableMode] = useState('check');
+  const { publishMessage } = useContext(MqttContext);
 
   const API_BASE_URL = import.meta.env.VITE_API_URL
   // Fetch logs from API
@@ -95,9 +97,25 @@ const TrayCalibration = () => {
     fetchLogs()
   }, [])
 
+  const handleClick = (topic, message) => {
+    publishMessage(topic, message);
+  }
+
+
+
 
   return (
     <div className="p-6">
+
+      <div className="flex justify-center mb-4">
+        <button className="bg-gray-500 text-white px-4 py-2 rounded-lg ml-2 hover:bg-gray-600"
+          onClick={() => handleClick("feeder/calibration_request", "start page")}
+        // disabled={loading}
+        >
+          Start
+        </button>
+      </div>
+
       <h1 className="text-2xl font-bold mb-4 underline">Manual Calibration</h1>
 
       {/* Step Count Input */}
@@ -116,6 +134,14 @@ const TrayCalibration = () => {
           disabled={loading}
         >
           {loading ? "Submitting..." : "Submit"}
+        </button>
+
+        <button className="bg-green-600 text-white px-4 py-2 rounded-lg ml-2 hover:bg-green-700"
+          // onClick={() => handleClick("feeder/calibration_value" , stepCount)}
+          onClick={() => handleClick("" , stepCount)}
+        // disabled={loading}
+        >
+          StepSubmit
         </button>
       </div>
 
@@ -188,6 +214,12 @@ const TrayCalibration = () => {
         >
           Check
         </button>
+        <button className="bg-green-600 text-white px-4 py-2 rounded-lg ml-2 hover:bg-green-700"
+          onClick={() => handleClick("feeder/calibration_confirm", "yes")}
+        // disabled={loading}
+        >
+          Calibration
+        </button>
       </div>
 
       {/* Measured Height Input */}
@@ -257,4 +289,3 @@ const TrayCalibration = () => {
 };
 
 export default TrayCalibration;
-  

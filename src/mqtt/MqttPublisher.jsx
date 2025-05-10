@@ -23,6 +23,7 @@ export const MqttProvider = ({ children }) => {
 
     mqttClient.on("connect", () => {
       console.log("✅ MQTT connected");
+      
       setIsConnected(true);
       mqttClient.subscribe("weight/1");
     });
@@ -47,16 +48,25 @@ export const MqttProvider = ({ children }) => {
   }, []);
 
 
-  const sendStartCommand = () => {
-    if (client && isConnected) {
-      const topic = "weight/subscribe";  // Topic to publish feeder start command
-      const payload = "Feeder Start";  // Payload message
-      client.publish(topic, payload);
-      console.log("📤 Published: Feeder Start");
+  // const sendStartCommand = () => {
+  //   if (client && isConnected) {
+  //     const topic = "weight/subscribe";  
+  //     const payload = "Feeder Start";  
+  //     client.publish(topic, payload);
+  //     console.log("📤 Published: Feeder Start");
   
-      // Subscribe to weight/1 topic for receiving updates after starting the feeder
-      client.subscribe("weight/1", { qos: 1 });
-      setIsFeederStarted(true);  // Set the flag to start receiving updates
+  //     // Subscribe to weight/1 topic for receiving updates after starting the feeder
+  //     client.subscribe("weight/1", { qos: 1 });
+  //     setIsFeederStarted(true);  // Set the flag to start receiving updates
+  //   }
+  // };
+
+  const publishMessage = (topic, message) => {
+    if (client && client.connected) {
+      client.publish(topic, message);
+      console.log(`🚀 Published to ${topic}:`, message);
+    } else {
+      console.warn("❌ MQTT client not connected");
     }
   };
   
@@ -70,7 +80,8 @@ export const MqttProvider = ({ children }) => {
         currentWeight,
         initialWeight,
         setInitialWeight,
-        sendStartCommand,
+        // sendStartCommand,
+        publishMessage
       }}
     >
       {children}
