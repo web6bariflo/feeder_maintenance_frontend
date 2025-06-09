@@ -25,7 +25,7 @@ export const MqttProvider = ({ children }) => {
       console.log("✅ MQTT connected");
       
       setIsConnected(true);
-      mqttClient.subscribe("weight/1");
+      mqttClient.subscribe("123/weight");
     });
 
     mqttClient.on("message", (topic, payload) => {
