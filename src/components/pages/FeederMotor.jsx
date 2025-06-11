@@ -19,7 +19,8 @@ const FeederMotorTest = () => {
     currentWeight,
     initialWeight,
     setInitialWeight,
-    publishMessage
+    publishMessage,
+    topicMessages
   } = useContext(MqttContext);
 
   const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -31,6 +32,15 @@ const FeederMotorTest = () => {
   const [weightData, setWeightData] = useState([{ weight: initialWeight }]);
   const [wasReset, setWasReset] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [callibration, setCallibration] = useState("")
+
+
+  const status = topicMessages["feeder/fdtryA00/maintenance/status"];
+
+  useEffect(() => {
+    console.log("🛠 Maintenance Status:", status);
+  }, [status]);
+
 
   // Process weight updates and submit data immediately
   useEffect(() => {
@@ -42,7 +52,6 @@ const FeederMotorTest = () => {
         const newRemaining = Math.max(initialWeight - currentWeight, 0);
         setRemainingWeight(newRemaining);
         setWeightData([{ weight: initialWeight }, { weight: newRemaining }]);
-        
         const newLog = {
           cycle: 1,
           startWeight: initialWeight,
@@ -130,7 +139,7 @@ const FeederMotorTest = () => {
       setWeightData([{ weight: initialWeight }]);
       setCycleLogs([]);
       hasSubmittedRef.current = false;
-      publishMessage("weight/subscribe", "Start");
+      publishMessage("feeder/fdtryA00/dispenser_request", "start");
     } else {
       alert("Set the initial weight first.");
     }
@@ -214,6 +223,8 @@ const FeederMotorTest = () => {
         <h1 className="text-2xl font-medium text-gray-800">Feeder Motor Test</h1>
         <p className="text-gray-500">Monitor and control the feeder motor performance</p>
       </div>
+ 
+      <div>status: {status}</div>
 
       <div className="bg-white rounded-lg shadow-sm p-5 space-y-4">
         <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-end flex-wrap">
@@ -273,6 +284,40 @@ const FeederMotorTest = () => {
             Feeder test completed successfully. Remaining weight is 0g.
           </div>
         )}
+      </div>
+
+      <div className="bg-white rounded-lg shadow-sm p-5 space-y-4">
+        {/* <!-- Top row buttons --> */}
+        <div className="flex justify-around">
+          <button className="bg-pink-500 hover:bg-pink-600 text-white font-medium py-2 px-5 rounded-md"
+            onClick={() => publishMessage("feeder/fdtryA00/tare_request", "start")}
+          >
+            tare_request
+          </button>
+          <button className="bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-2 px-5 rounded-md"
+            onClick={() => publishMessage("feeder/fdtryA00/tare_confirm", "yes")}
+          >
+            tare_confirm
+          </button>
+        </div>
+
+        {/* <!-- Bottom row input and submit --> */}
+        <div className="flex">
+          <input
+            type="number"
+            placeholder="Enter number"
+            value={callibration || " "}
+            onChange={(e) => setCallibration(Number(e.target.value))}
+            className="w-full mx-2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+          <div className="flex flex-row gap-2">
+            <button
+              className="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+            >
+              submit
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

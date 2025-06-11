@@ -16,7 +16,13 @@ const TrayCalibration = () => {
   const [targetHeight, setTargetHeight] = useState("");
   const [confirmationHeight, setConfirmationHeight] = useState("");
   const [tableMode, setTableMode] = useState('check');
-  const { publishMessage } = useContext(MqttContext);
+  const { publishMessage,topicMessages } = useContext(MqttContext);
+
+  const status = topicMessages["feeder/fdtryA00/maintenance/status"];
+  
+    useEffect(() => {
+      console.log("🛠 Maintenance Status:", status);
+    }, [status]);
 
   const API_BASE_URL = import.meta.env.VITE_API_URL
   // Fetch logs from API
@@ -36,9 +42,11 @@ const TrayCalibration = () => {
     setLoading(true);
     try {
       const res = await axios.post(`${API_BASE_URL}/create_feeder/`, { stepCount: stepCount });
-      console.log(res.data.id);
+      if (res.status == 201) {
+        publishMessage("feeder/fdtryA00/tray/calibration_value",stepCount)
+      }
       setId(res.data.id)
-      setStepSubmitted(true); // Allow measured height input
+      setStepSubmitted(true); 
     } catch (error) {
       console.error("Error submitting step count:", error);
     } finally {
@@ -81,6 +89,7 @@ const TrayCalibration = () => {
     try {
       const response = await axios.post(`${API_BASE_URL}/create_feeder_view/`, { targetHeight: targetHeight });
       if (response.status === 200) {
+        publishMessage("feeder/fdtryA00/tray/calibration_value",targetHeight)
         setTargetLogs(response.data.data);
         setTargetId(response.data.data[0].feeder_id)
       }
@@ -89,7 +98,6 @@ const TrayCalibration = () => {
       console.log(error);
     }
   };
-
   console.log(targetLogs);
 
 
@@ -109,12 +117,14 @@ const TrayCalibration = () => {
 
       <div className="flex justify-center mb-4">
         <button className="bg-gray-500 text-white px-4 py-2 rounded-lg ml-2 hover:bg-gray-600"
-          onClick={() => handleClick("feeder/calibration_request", "start page")}
+          onClick={() => handleClick("feeder/fdtryA00/tray/calibration_request","start")}
         // disabled={loading}
         >
-          Start
+          Start Tray Callibration
         </button>
       </div>
+
+      <div>status: {status} </div>
 
       <h1 className="text-2xl font-bold mb-4 underline">Manual Calibration</h1>
 
@@ -137,9 +147,8 @@ const TrayCalibration = () => {
         </button>
 
         <button className="bg-green-600 text-white px-4 py-2 rounded-lg ml-2 hover:bg-green-700"
-          // onClick={() => handleClick("feeder/calibration_value" , stepCount)}
-          onClick={() => handleClick("" , stepCount)}
-        // disabled={loading}
+          onClick={() => handleClick("feeder/fdtryA00/tray/calibration_confirm" , "yes")}
+        
         >
           StepSubmit
         </button>
@@ -215,8 +224,7 @@ const TrayCalibration = () => {
           Check
         </button>
         <button className="bg-green-600 text-white px-4 py-2 rounded-lg ml-2 hover:bg-green-700"
-          onClick={() => handleClick("feeder/calibration_confirm", "yes")}
-        // disabled={loading}
+          onClick={() => handleClick("feeder/fdtryA00/tray/calibration_confirm", "yes")}
         >
           Calibration
         </button>

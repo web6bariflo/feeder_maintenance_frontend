@@ -9,7 +9,7 @@ export const MqttProvider = ({ children }) => {
   const [messages, setMessages] = useState([]);
   const [currentWeight, setCurrentWeight] = useState(null);
   const [initialWeight, setInitialWeight] = useState(100);
-  const [isFeederStarted, setIsFeederStarted] = useState(false);
+  const [topicMessages, setTopicMessages] = useState({}); // ✅ Added topic-wise state
 
   useEffect(() => {
     const mqttClient = mqtt.connect({
@@ -23,22 +23,43 @@ export const MqttProvider = ({ children }) => {
 
     mqttClient.on("connect", () => {
       console.log("✅ MQTT connected");
-      
-      setIsConnected(true);
-      mqttClient.subscribe("123/weight");
+
+      const topics = [
+        "feeder/fdtryA00/maintenance/status",
+      ];
+
+      topics.forEach((topic) => {
+        mqttClient.subscribe(topic, (err) => {
+          if (!err) {
+            console.log(`📡 Subscribed to: ${topic}`);
+          }
+        });
+      });
+
+      setIsConnected(true); // ✅ Ensure we set connected status
     });
 
     mqttClient.on("message", (topic, payload) => {
       const message = payload.toString();
       console.log(`📩 ${topic}: ${message}`);
+
+      // Keep full message history (optional)
       setMessages((prev) => [...prev, { topic, message }]);
-    
-      const numeric = parseFloat(message);
-      if (!isNaN(numeric)) {
-        setCurrentWeight(numeric);
+
+      // ✅ Store latest message by topic
+      setTopicMessages((prev) => ({
+        ...prev,
+        [topic]: message,
+      }));
+
+      // ✅ Only update currentWeight for "weight/1"
+      if (topic === "weight/1") {
+        const numeric = parseFloat(message);
+        if (!isNaN(numeric)) {
+          setCurrentWeight(numeric);
+        }
       }
     });
-    
 
     mqttClient.on("error", (err) => console.error("❌ MQTT error", err));
     mqttClient.on("close", () => setIsConnected(false));
@@ -46,20 +67,6 @@ export const MqttProvider = ({ children }) => {
     setClient(mqttClient);
     return () => mqttClient.end();
   }, []);
-
-
-  // const sendStartCommand = () => {
-  //   if (client && isConnected) {
-  //     const topic = "weight/subscribe";  
-  //     const payload = "Feeder Start";  
-  //     client.publish(topic, payload);
-  //     console.log("📤 Published: Feeder Start");
-  
-  //     // Subscribe to weight/1 topic for receiving updates after starting the feeder
-  //     client.subscribe("weight/1", { qos: 1 });
-  //     setIsFeederStarted(true);  // Set the flag to start receiving updates
-  //   }
-  // };
 
   const publishMessage = (topic, message) => {
     if (client && client.connected) {
@@ -69,9 +76,7 @@ export const MqttProvider = ({ children }) => {
       console.warn("❌ MQTT client not connected");
     }
   };
-  
-  
-  
+
   return (
     <MqttContext.Provider
       value={{
@@ -80,8 +85,8 @@ export const MqttProvider = ({ children }) => {
         currentWeight,
         initialWeight,
         setInitialWeight,
-        // sendStartCommand,
-        publishMessage
+        publishMessage,
+        topicMessages, // ✅ Expose topic-wise message access
       }}
     >
       {children}

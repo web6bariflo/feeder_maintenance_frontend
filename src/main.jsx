@@ -10,7 +10,6 @@ const rootElement = document.getElementById("root"); // Get the root element
 
 createRoot(rootElement).render(
   <React.StrictMode>
-    {/* Wrapping the entire app with MqttProvider */}
     <MqttProvider>
       <App />
     </MqttProvider>

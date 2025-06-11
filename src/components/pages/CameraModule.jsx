@@ -58,12 +58,12 @@ const CameraModule = () => {
 
   const handleCapture = () => {
     console.log("Capture button clicked");
-    publishMessage("feeder/camera_capture", "Capture");
+    publishMessage("feeder/fdtryA00/camera_capture", "start");
   };
 
   const handleAutoCapture = () => {
     console.log("Auto Capture button clicked");
-    publishMessage("feeder/camera_auto_toggle", "on");
+    publishMessage("feeder/fdtryA00/camera_auto_toggle", "on");
   };
 
   const handleDownloadAll = async () => {
