@@ -14,8 +14,11 @@ const CameraModule = () => {
 
   const { publishMessage } = React.useContext(MqttContext);
 
+  const apiUrl = import.meta.env.VITE_API_URL
+  const wsUrl = import.meta.env.VITE_WS_URL
+
   useEffect(() => {
-    const socket = new WebSocket("ws://192.168.31.149:8000/ws/thermal-images/");
+    const socket = new WebSocket(`${wsUrl}/ws/thermal-images/`);
     setInterval(() => {
       if (socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({ type: "ping" }));
@@ -69,7 +72,7 @@ const CameraModule = () => {
   const handleDownloadAll = async () => {
     try {
       const response = await axios.post(
-        "http://192.168.31.149:8000/download_all_thermal_images/",
+        `${apiUrl}/download_all_thermal_images/`,
         null,
         { responseType: "blob" }
       );

@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { FaCogs, FaCamera, FaToolbox } from "react-icons/fa";
+import { HiOutlineHome } from 'react-icons/hi2';
 import { NavLink } from "react-router-dom"; // ✅ Fix import here
 
 const Sidebar = ({ onLinkClick }) => {
   const [active, setActive] = useState();
 
   const menuItems = [
-    { name: "Home", icon: <FaCogs />, path: "/" },
+    { name: "Home",icon: <HiOutlineHome />,  path: "/" },
     { name: "Feeder Motor Test", icon: <FaCogs />, path: "/feeder-motor" },
     { name: "Tray Calibration", icon: <FaToolbox />, path: "/tray-calibration" },
     { name: "Camera Module", icon: <FaCamera />, path: "/camera-module" },
