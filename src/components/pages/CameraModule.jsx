@@ -8,7 +8,6 @@ import { FiDownload } from "react-icons/fi"; // Feather Icons
 
 
 const CameraModule = () => {
-  const API_BASE_URL = import.meta.env.VITE_API_URL;
 
   const [imageData, setImageData] = useState([]);
 

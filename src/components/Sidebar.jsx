@@ -1,3 +1,4 @@
+import React from "react";
 import { useState } from "react";
 import { FaCogs, FaCamera, FaToolbox } from "react-icons/fa";
 import { HiOutlineHome } from 'react-icons/hi2';
