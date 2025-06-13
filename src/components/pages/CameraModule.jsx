@@ -15,6 +15,7 @@ const CameraModule = () => {
 
   const apiUrl = import.meta.env.VITE_API_URL
   const wsUrl = import.meta.env.VITE_WS_URL
+  
 
   useEffect(() => {
     const socket = new WebSocket(`${wsUrl}/ws/thermal-images/`);
@@ -23,7 +24,7 @@ const CameraModule = () => {
         socket.send(JSON.stringify({ type: "ping" }));
       }
     }, 30000);
-
+    
     socket.onopen = () => {
       console.log("WebSocket Connected");
     };
@@ -70,9 +71,7 @@ const CameraModule = () => {
 
   const handleDownloadAll = async () => {
     try {
-      const response = await axios.post(
-        `${apiUrl}/download_all_thermal_images/`,
-        null,
+      const response = await axios.post(`${apiUrl}/download_all_thermal_images/`,null,
         { responseType: "blob" }
       );
 
