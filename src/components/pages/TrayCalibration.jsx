@@ -89,7 +89,8 @@ const TrayCalibration = () => {
     try {
       const response = await axios.post(`${API_BASE_URL}/create_feeder_view/`, { targetHeight: targetHeight });
       if (response.status === 200) {
-        publishMessage("feeder/fdtryA00/tray/calibration_value",targetHeight)
+        // console.log(response.data.data[0].stepCount);
+        publishMessage("feeder/fdtryA00/tray/calibration_value",`${response.data.data[0].stepCount}`)
         setTargetLogs(response.data.data);
         setTargetId(response.data.data[0].feeder_id)
       }
